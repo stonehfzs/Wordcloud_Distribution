@@ -14,7 +14,8 @@ surnames = df[name_col].dropna().astype(str).str[0]
 # 统计姓氏频率
 dict_freq = surnames.value_counts().to_dict()
 
-# 生成反向mask，中央椭圆为空白，内容分布在外部
+
+# 生成反向椭圆mask，中央椭圆留白，内容分布在外部
 ellipse_width, ellipse_height = 1600, 800
 # 椭圆尽可能铺满整个屏幕，只留极小边距
 pad_x, pad_y = 30, 30
@@ -24,37 +25,13 @@ draw.ellipse([(pad_x, pad_y), (ellipse_width-pad_x-1, ellipse_height-pad_y-1)], 
 ellipse_mask = np.array(ellipse_img)
 
 # 生成高分辨率椭圆词云，减小margin使内容更集中
-mask_width, mask_height = 2000, 800
-mask_img = Image.new('L', (mask_width, mask_height), 255)  # 白底
-draw = ImageDraw.Draw(mask_img)
-from PIL import ImageFont
-try:
-	font = ImageFont.truetype('arial.ttf', 600)
-except:
-	font = ImageFont.load_default()
-# 居中绘制HAIDE，并整体右移
-text = "HAIDE"
-try:
-	bbox = font.getbbox(text)
-	text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
-except AttributeError:
-	text_width, text_height = font.getsize(text)
-# 右移100像素
-text_x = (mask_width - text_width) // 2 + 100
-text_y = (mask_height - text_height) // 2
-draw.text((text_x, text_y), text, font=font, fill=0)
-haide_mask = np.array(mask_img)
-
-wc = WordCloud(font_path='simkai.ttf', width=mask_width, height=mask_height, background_color='white', scale=2, mask=haide_mask, margin=2, collocations=False, prefer_horizontal=1.0)
-wc.generate_from_frequencies(dict_freq)
-# 生成HAIDE字母词云（更紧凑）
 wc = WordCloud(
 	font_path='simkai.ttf',
-	width=mask_width,
-	height=mask_height,
+	width=ellipse_width,
+	height=ellipse_height,
 	background_color='white',
 	scale=2,
-	mask=haide_mask,
+	mask=ellipse_mask,
 	margin=0,
 	max_words=1000,
 	relative_scaling=0.2,
@@ -62,6 +39,28 @@ wc = WordCloud(
 	prefer_horizontal=1.0
 )
 wc.generate_from_frequencies(dict_freq)
+
+# 自定义颜色函数，主色调为00A7EB，增强对比度
+from wordcloud import get_single_color_func
+class BlueColorFunc(object):
+	def __init__(self, base_color='#00A7EB'):
+		self.base_color = base_color
+		# 增加更深和更亮的蓝色，增强对比
+		self.variations = [
+			'#00A7EB',  # 主色
+			'#0070A8',  # 深蓝
+			'#33B8E8',  # 浅蓝
+			'#005077',  # 极深蓝
+			'#66CFF2',  # 亮蓝
+			'#00334D',  # 最深蓝
+			'#40CFFF',  # 高亮蓝
+			'#0090C7',  # 中蓝
+		]
+	def __call__(self, word, font_size, position, orientation, random_state=None, **kwargs):
+		import random
+		return random.choice(self.variations)
+
+wc.recolor(color_func=BlueColorFunc())
 
 # 显示并保存高分辨率词云
 plt.figure(figsize=(16, 8), dpi=100)
