@@ -29,7 +29,8 @@ wc = WordCloud(
 	font_path='simkai.ttf',
 	width=ellipse_width,
 	height=ellipse_height,
-	background_color='white',
+	background_color=None,
+	mode='RGBA',
 	scale=2,
 	mask=ellipse_mask,
 	margin=0,
@@ -67,5 +68,5 @@ plt.figure(figsize=(16, 8), dpi=100)
 plt.imshow(wc, interpolation='nearest')
 plt.axis('off')
 plt.tight_layout(pad=0)
-plt.savefig('name_wordcloud.png', dpi=300, bbox_inches='tight', pad_inches=0.0)
+plt.savefig('name_wordcloud.png', dpi=300, bbox_inches='tight', pad_inches=0.0, transparent=True)
 plt.show()

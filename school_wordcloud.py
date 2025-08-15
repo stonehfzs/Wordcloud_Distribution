@@ -25,7 +25,7 @@ draw.ellipse([(pad_x, pad_y), (ellipse_width-pad_x-1, ellipse_height-pad_y-1)], 
 ellipse_mask = np.array(ellipse_img)
 
 # 生成高分辨率椭圆词云，减小margin使内容更集中
-wc = WordCloud(font_path='simkai.ttf', width=ellipse_width, height=ellipse_height, background_color='white', scale=2, mask=ellipse_mask, margin=2, collocations=False, prefer_horizontal=1.0)
+wc = WordCloud(font_path='simkai.ttf', width=ellipse_width, height=ellipse_height, background_color=None, mode='RGBA', scale=2, mask=ellipse_mask, margin=2, collocations=False, prefer_horizontal=1.0)
 
 # 自定义颜色函数，主色调为00A7EB，少量深浅变化
 from wordcloud import get_single_color_func
@@ -51,9 +51,10 @@ wc.generate_from_frequencies(dict_freq)
 wc.recolor(color_func=BlueColorFunc())
 
 # 显示并保存高分辨率词云
+# 保存为带透明通道的PNG
 plt.figure(figsize=(16, 8), dpi=100)
 plt.imshow(wc, interpolation='nearest')
 plt.axis('off')
 plt.tight_layout(pad=0)
-plt.savefig('school_wordcloud.png', dpi=300, bbox_inches='tight', pad_inches=0.0)
+plt.savefig('school_wordcloud.png', dpi=300, bbox_inches='tight', pad_inches=0.0, transparent=True)
 plt.show()
